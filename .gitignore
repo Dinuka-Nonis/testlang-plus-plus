@@ -30,4 +30,5 @@ target/
 out/
 .idea/
 .DS_Store
-
+*.java
+!src/main/java/**
