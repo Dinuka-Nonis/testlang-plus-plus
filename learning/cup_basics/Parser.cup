@@ -1,0 +1,38 @@
+   /* ============================================================
+      Simple CUP Parser for TestLang++ Learning
+      Grammar: let IDENT = STRING;
+      ============================================================ */
+   import java_cup.runtime.*;
+
+   parser code {:
+      public static void main(String[] args) throws Exception {
+         System.out.println("Enter: let name = \"value\";");
+         Parser parser = new Parser(new Lexer(new java.io.InputStreamReader(System.in)));
+         parser.parse();
+      }
+   :};
+
+   /* --------------------------
+      Terminals with value types
+      -------------------------- */
+   terminal String IDENT, STRING;
+   terminal LET, EQUALS, SEMI;
+
+   /* --------------------------
+      Nonterminals
+      -------------------------- */
+   non terminal declaration;
+
+   /* --------------------------
+      Start symbol
+      -------------------------- */
+   start with declaration;
+
+   /* --------------------------
+      Grammar productions
+      -------------------------- */
+   declaration ::=
+      LET IDENT:i EQUALS STRING:s SEMI
+      {: 
+         System.out.println("Parsed LET statement: " + i + " = " + s);
+      :};
