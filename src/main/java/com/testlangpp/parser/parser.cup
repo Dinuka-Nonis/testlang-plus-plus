@@ -1,0 +1,68 @@
+/* ============================================================
+   Parser for TestLang++ File Structure
+   ------------------------------------------------------------
+   Grammar covers config, let, and test blocks.
+   ============================================================ */
+
+package com.testlangpp.parser;
+
+import java.util.*;
+import com.testlangpp.model.*;
+
+parser code {:
+  public static void main(String[] args) throws Exception {
+    System.out.println("Parsing input.test ...");
+    String path = "src/main/java/com/testlangpp/lexer/input.test";
+    Parser parser = new Parser(
+      new com.testlangpp.lexer.Lexer(new java.io.FileReader(path))
+    );
+    Program program = (Program) parser.parse().value;
+    System.out.println(program);
+  }
+:};
+
+/* --------------------------
+   Terminals
+   -------------------------- */
+terminal CONFIG, BASE_URL, LET, TEST, GET, EXPECT, STATUS;
+terminal LBRACE, RBRACE, EQUALS, SEMI;
+terminal String IDENT, STRING;
+
+/* --------------------------
+   Nonterminals
+   -------------------------- */
+non terminal Program program;
+non terminal Config config_section;
+non terminal List variable_list;
+non terminal Variable variable_decl;
+non terminal List test_list;
+non terminal TestBlock test_block;
+
+/* --------------------------
+   Start symbol
+   -------------------------- */
+start with program;
+
+/* --------------------------
+   Grammar rules
+   -------------------------- */
+
+program ::= config_section:c variable_list:v test_list:t
+  {: RESULT = new Program(c, v, t); :};
+
+config_section ::= CONFIG LBRACE BASE_URL EQUALS STRING:s SEMI RBRACE
+  {: RESULT = new Config(s); :};
+
+variable_list ::= 
+    /* empty */                       {: RESULT = new ArrayList(); :}
+  | variable_list:vl variable_decl:vd {: vl.add(vd); RESULT = vl; :};
+
+variable_decl ::= LET IDENT:i EQUALS STRING:s SEMI
+  {: RESULT = new Variable(i, s); :};
+
+test_list ::= 
+    test_block:tb                {: List l = new ArrayList(); l.add(tb); RESULT = l; :}
+  | test_list:tl test_block:tb   {: tl.add(tb); RESULT = tl; :};
+
+test_block ::= TEST IDENT:name LBRACE GET STRING:path SEMI EXPECT STATUS EQUALS STRING:status SEMI RBRACE
+  {: RESULT = new TestBlock(name, path, Integer.parseInt(status)); :};
