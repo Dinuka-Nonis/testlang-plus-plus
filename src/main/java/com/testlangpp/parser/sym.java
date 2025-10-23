@@ -8,21 +8,28 @@ package com.testlangpp.parser;
 /** CUP generated class containing symbol constants. */
 public class sym {
   /* terminals */
-  public static final int LBRACE = 9;
-  public static final int IDENT = 13;
-  public static final int STATUS = 8;
-  public static final int SEMI = 12;
-  public static final int STRING = 14;
-  public static final int EOF = 0;
-  public static final int EXPECT = 7;
+  public static final int POST = 9;
+  public static final int IDENT = 19;
+  public static final int RBRACE = 16;
   public static final int TEST = 5;
-  public static final int BASE_URL = 3;
+  public static final int SEMI = 18;
+  public static final int STATUS = 7;
+  public static final int EXPECT = 6;
+  public static final int LBRACE = 15;
+  public static final int PUT = 10;
+  public static final int CONTAINS = 14;
+  public static final int STRING = 20;
+  public static final int EQUALS = 17;
+  public static final int NUMBER = 21;
+  public static final int EOF = 0;
   public static final int error = 1;
-  public static final int GET = 6;
-  public static final int EQUALS = 11;
   public static final int LET = 4;
-  public static final int RBRACE = 10;
+  public static final int BODY = 13;
+  public static final int HEADER = 12;
+  public static final int BASE_URL = 3;
+  public static final int DELETE = 11;
   public static final int CONFIG = 2;
+  public static final int GET = 8;
   public static final String[] terminalNames = new String[] {
   "EOF",
   "error",
@@ -30,15 +37,22 @@ public class sym {
   "BASE_URL",
   "LET",
   "TEST",
-  "GET",
   "EXPECT",
   "STATUS",
+  "GET",
+  "POST",
+  "PUT",
+  "DELETE",
+  "HEADER",
+  "BODY",
+  "CONTAINS",
   "LBRACE",
   "RBRACE",
   "EQUALS",
   "SEMI",
   "IDENT",
-  "STRING"
+  "STRING",
+  "NUMBER"
   };
 }
 

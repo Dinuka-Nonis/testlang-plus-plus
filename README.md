@@ -114,3 +114,23 @@ cd testlang-plus-plus
          │ Output: Pass/Fail results                    │
          └──────────────────────────────────────────────┘
 
+# Clean generated files
+Remove-Item src\main\java\com\testlangpp\lexer\Lexer.java -ErrorAction SilentlyContinue
+Remove-Item src\main\java\com\testlangpp\parser\Parser.java -ErrorAction SilentlyContinue
+Remove-Item src\main\java\com\testlangpp\parser\sym.java -ErrorAction SilentlyContinue
+Remove-Item -Recurse -Force com -ErrorAction SilentlyContinue
+
+# Generate Lexer
+jflex -d src\main\java\com\testlangpp\lexer src\main\java\com\testlangpp\lexer\Lexer.flex
+
+# Generate Parser
+java -jar "D:\SLIIT\semester_4\PP\ASSIGNMENT\java-cup-bin-11b-20160615\java-cup-11b.jar" -destdir src\main\java\com\testlangpp\parser -parser Parser -symbols sym src\main\java\com\testlangpp\parser\Parser.cup
+
+# Compile in order
+javac -cp ".;D:\SLIIT\semester_4\PP\ASSIGNMENT\java-cup-bin-11b-20160615\java-cup-11b-runtime.jar" -d . src\main\java\com\testlangpp\model\*.java
+
+javac -cp ".;D:\SLIIT\semester_4\PP\ASSIGNMENT\java-cup-bin-11b-20160615\java-cup-11b-runtime.jar" -d . src\main\java\com\testlangpp\parser\sym.java
+
+javac -cp ".;D:\SLIIT\semester_4\PP\ASSIGNMENT\java-cup-bin-11b-20160615\java-cup-11b-runtime.jar" -d . src\main\java\com\testlangpp\lexer\Lexer.java
+
+javac -cp ".;D:\SLIIT\semester_4\PP\ASSIGNMENT\java-cup-bin-11b-20160615\java-cup-11b-runtime.jar" -d . src\main\java\com\testlangpp\parser\Parser.java
