@@ -1,17 +1,30 @@
 package com.testlangpp.model;
 
+import java.util.List;
+
 public class TestBlock {
     public String name;
-    public String path;
-    public int status;
+    public RequestStatement request;
+    public List<Assertion> assertions;
 
-    public TestBlock(String name, String path, int status) {
+    public TestBlock(String name, RequestStatement request, List<Assertion> assertions) {
         this.name = name;
-        this.path = path;
-        this.status = status;
+        this.request = request;
+        this.assertions = assertions;
     }
 
+    @Override
     public String toString() {
-        return "test " + name + " { GET \"" + path + "\"; expect status = " + status + "; }";
+        StringBuilder sb = new StringBuilder();
+        sb.append("test ").append(name).append(" {\n");
+        if (request != null)
+            sb.append("  ").append(request).append("\n");
+        if (assertions != null) {
+            for (Assertion a : assertions) {
+                sb.append("  ").append(a).append("\n");
+            }
+        }
+        sb.append("}");
+        return sb.toString();
     }
 }

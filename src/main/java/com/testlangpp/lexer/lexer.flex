@@ -32,8 +32,14 @@ import com.testlangpp.parser.sym;
 Letter = [A-Za-z_]
 Digit = [0-9]
 Ident = {Letter}({Letter}|{Digit})*
+Number = {Digit}+
 Whitespace = [ \t\r\n]+
 String = \"[^\"]*\"
+
+/* Escape-aware string handling */
+ESC = \\.
+STRCHAR = ([^\"\\\r\n] | {ESC})
+STRING = \"({STRCHAR})*\"
 
 %%
 
@@ -43,8 +49,14 @@ String = \"[^\"]*\"
 "let"         { return symbol(sym.LET); }
 "test"        { return symbol(sym.TEST); }
 "GET"         { return symbol(sym.GET); }
+"POST"        { return symbol(sym.POST); }
+"PUT"         { return symbol(sym.PUT); }
+"DELETE"      { return symbol(sym.DELETE); }
 "expect"      { return symbol(sym.EXPECT); }
 "status"      { return symbol(sym.STATUS); }
+"header"      { return symbol(sym.HEADER); }
+"body"        { return symbol(sym.BODY); }
+"contains"    { return symbol(sym.CONTAINS); }
 
 /* Operators */
 "="           { return symbol(sym.EQUALS); }
@@ -54,8 +66,17 @@ String = \"[^\"]*\"
 
 /* Identifiers and literals */
 {Ident}       { return symbol(sym.IDENT, yytext()); }
-{String}      { return symbol(sym.STRING, yytext().substring(1, yytext().length() - 1)); }
-
+{Number}      { return symbol(sym.NUMBER, Integer.parseInt(yytext())); }
+{STRING} {
+    String raw = yytext(); // includes surrounding quotes
+    // remove surrounding quotes
+    String inner = raw.substring(1, raw.length() - 1);
+    // unescape common sequences: \" -> ", \\ -> \, \n -> newline, etc.
+    inner = inner.replace("\\\"", "\"").replace("\\\\", "\\")
+                 .replace("\\n", "\n").replace("\\r", "\r")
+                 .replace("\\t", "\t").replace("\\b", "").replace("\\f", "");
+    return symbol(sym.STRING, inner);
+}
 /* Skip whitespace */
 {Whitespace}  { /* ignore */ }
 

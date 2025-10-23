@@ -1,68 +1,143 @@
-/* ============================================================
-   Parser for TestLang++ File Structure
-   ------------------------------------------------------------
-   Grammar covers config, let, and test blocks.
-   ============================================================ */
+  /* ============================================================
+    Parser for TestLang++ File Structure
+    ------------------------------------------------------------
+    Grammar covers config, let, and test blocks.
+    ============================================================ */
 
-package com.testlangpp.parser;
+  package com.testlangpp.parser;
 
-import java.util.*;
-import com.testlangpp.model.*;
+  import java.util.*;
+  import com.testlangpp.model.*;
 
-parser code {:
-  public static void main(String[] args) throws Exception {
-    System.out.println("Parsing input.test ...");
-    String path = "src/main/java/com/testlangpp/lexer/input.test";
-    Parser parser = new Parser(
-      new com.testlangpp.lexer.Lexer(new java.io.FileReader(path))
-    );
-    Program program = (Program) parser.parse().value;
-    System.out.println(program);
-  }
-:};
+  parser code {:
+    public static void main(String[] args) throws Exception {
+      System.out.println("Parsing input.test ...");
+      String path = "src/main/java/com/testlangpp/lexer/input.test";
+      Parser parser = new Parser(
+        new com.testlangpp.lexer.Lexer(new java.io.FileReader(path))
+      );
+      Program program = (Program) parser.parse().value;
+      System.out.println(program);
+    }
+  :};
 
-/* --------------------------
-   Terminals
-   -------------------------- */
-terminal CONFIG, BASE_URL, LET, TEST, GET, EXPECT, STATUS;
-terminal LBRACE, RBRACE, EQUALS, SEMI;
-terminal String IDENT, STRING;
+  /* --------------------------
+    Terminals
+    -------------------------- */
+  terminal CONFIG, BASE_URL, LET, TEST, EXPECT, STATUS;
+  terminal GET, POST, PUT, DELETE;
+  terminal HEADER, BODY, CONTAINS;
+  terminal LBRACE, RBRACE, EQUALS, SEMI;
+  terminal String IDENT, STRING;
+  terminal Integer NUMBER;
 
-/* --------------------------
-   Nonterminals
-   -------------------------- */
-non terminal Program program;
-non terminal Config config_section;
-non terminal List variable_list;
-non terminal Variable variable_decl;
-non terminal List test_list;
-non terminal TestBlock test_block;
+  /* --------------------------
+    Nonterminals
+    -------------------------- */
+  non terminal Program program;
+  non terminal Config config_section;
+  non terminal List variable_list;
+  non terminal Variable variable_decl;
+  non terminal List test_list;
+  non terminal TestBlock test_block;
+  non terminal RequestStatement request_stmt;
+  non terminal List header_list;
+  non terminal RequestHeader header_stmt;
+  non terminal RequestBody body_stmt;
+  non terminal List assertion_list;
+  non terminal Assertion assertion;
+  non terminal List config_header_list;
 
-/* --------------------------
-   Start symbol
-   -------------------------- */
-start with program;
+  /* --------------------------
+    Start symbol
+    -------------------------- */
+  start with program;
 
-/* --------------------------
-   Grammar rules
-   -------------------------- */
+  /* --------------------------
+    Grammar rules
+    -------------------------- */
 
-program ::= config_section:c variable_list:v test_list:t
-  {: RESULT = new Program(c, v, t); :};
+  program ::=
+      config_section:c variable_list:v test_list:t
+        {: RESULT = new Program(c, v, t); :}
+    | variable_list:v test_list:t
+        {: RESULT = new Program(null, v, t); :};
 
-config_section ::= CONFIG LBRACE BASE_URL EQUALS STRING:s SEMI RBRACE
-  {: RESULT = new Config(s); :};
+  /* Config Section with base_url and optional headers */
+  config_section ::=
+      CONFIG LBRACE BASE_URL EQUALS STRING:url SEMI config_header_list:hl RBRACE
+        {: RESULT = new Config(url, hl); :};
 
-variable_list ::= 
-    /* empty */                       {: RESULT = new ArrayList(); :}
-  | variable_list:vl variable_decl:vd {: vl.add(vd); RESULT = vl; :};
+  /* Optional list of headers inside config block */
+  config_header_list ::=
+      /* empty */                            {: RESULT = new ArrayList(); :}
+    | config_header_list:hl HEADER STRING:key EQUALS STRING:val SEMI
+        {: hl.add(new RequestHeader(key, val)); RESULT = hl; :};
 
-variable_decl ::= LET IDENT:i EQUALS STRING:s SEMI
-  {: RESULT = new Variable(i, s); :};
+  /* Variable declarations - supports both string and integer */
+  variable_list ::= 
+      /* empty */                       {: RESULT = new ArrayList(); :}
+    | variable_list:vl variable_decl:vd {: vl.add(vd); RESULT = vl; :};
 
-test_list ::= 
-    test_block:tb                {: List l = new ArrayList(); l.add(tb); RESULT = l; :}
-  | test_list:tl test_block:tb   {: tl.add(tb); RESULT = tl; :};
+  variable_decl ::=
+      LET IDENT:i EQUALS STRING:s SEMI
+        {: RESULT = new Variable(i, s); :}
+    | LET IDENT:i EQUALS NUMBER:n SEMI
+        {: RESULT = new Variable(i, n); :};
 
-test_block ::= TEST IDENT:name LBRACE GET STRING:path SEMI EXPECT STATUS EQUALS STRING:status SEMI RBRACE
-  {: RESULT = new TestBlock(name, path, Integer.parseInt(status)); :};
+  /* Test blocks */
+  test_list ::= 
+      test_block:tb                {: List l = new ArrayList(); l.add(tb); RESULT = l; :}
+    | test_list:tl test_block:tb   {: tl.add(tb); RESULT = tl; :};
+
+  test_block ::=
+      TEST IDENT:name LBRACE request_stmt:req assertion_list:asserts RBRACE
+      {: RESULT = new TestBlock(name, req, asserts); :};
+
+  /* HTTP Request Statements */
+  request_stmt ::=
+      GET STRING:path SEMI
+        {: RESULT = new RequestStatement("GET", path, null, null); :}
+    | DELETE STRING:path SEMI
+        {: RESULT = new RequestStatement("DELETE", path, null, null); :}
+    | POST STRING:path LBRACE header_list:h body_stmt:b RBRACE SEMI
+        {: RESULT = new RequestStatement("POST", path, h, b); :}
+    | PUT STRING:path LBRACE header_list:h body_stmt:b RBRACE SEMI
+        {: RESULT = new RequestStatement("PUT", path, h, b); :}
+    | POST STRING:path SEMI
+        {: RESULT = new RequestStatement("POST", path, null, null); :}
+    | PUT STRING:path SEMI
+        {: RESULT = new RequestStatement("PUT", path, null, null); :};
+
+  /* Header list (zero or more inside POST/PUT blocks) */
+  header_list ::=
+      /* empty */                    {: RESULT = new ArrayList(); :}
+    | header_list:hl header_stmt:h   {: hl.add(h); RESULT = hl; :};
+
+  /* Single header */
+  header_stmt ::= HEADER STRING:key EQUALS STRING:val SEMI
+    {: RESULT = new RequestHeader(key, val); :};
+
+  /* Body (optional) */
+  body_stmt ::=
+      /* empty */                {: RESULT = null; :}
+    | BODY EQUALS STRING:content SEMI
+        {: RESULT = new RequestBody(content); :};
+
+  /* Assertion list (two or more required by spec) */
+  assertion_list ::=
+      assertion:a1 assertion:a2  
+        {: List l = new ArrayList(); l.add(a1); l.add(a2); RESULT = l; :}
+    | assertion_list:al assertion:a
+        {: al.add(a); RESULT = al; :};
+
+  /* Assertion types */
+  assertion ::=
+      EXPECT STATUS EQUALS NUMBER:n SEMI
+        {: RESULT = new Assertion(n); :}
+    | EXPECT HEADER STRING:key EQUALS STRING:val SEMI
+        {: RESULT = new Assertion(key, val, true); :}
+    | EXPECT HEADER STRING:key CONTAINS STRING:val SEMI
+        {: RESULT = new Assertion(key, val, false); :}
+    | EXPECT BODY CONTAINS STRING:val SEMI
+        {: RESULT = new Assertion(val); :};
