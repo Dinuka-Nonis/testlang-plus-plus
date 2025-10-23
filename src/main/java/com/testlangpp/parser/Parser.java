@@ -183,6 +183,9 @@ public class Parser extends java_cup.runtime.lr_parser {
       );
       Program program = (Program) parser.parse().value;
       System.out.println(program);
+
+      com.testlangpp.generator.TestGenerator.generate(program);
+
     }
   
 
