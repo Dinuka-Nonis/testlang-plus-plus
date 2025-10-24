@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.testlangpp.model.Assertion;
@@ -162,7 +163,13 @@ public class TestGenerator {
         if (text == null || variables == null) return text;
         
         String result = text;
-        for (Variable var : variables) {
+        
+        // Sort variables by name length (longest first) to avoid partial matches
+        // This prevents $user from matching part of $userId
+        List<Variable> sortedVars = new ArrayList<>(variables);
+        sortedVars.sort((a, b) -> Integer.compare(b.name.length(), a.name.length()));
+        
+        for (Variable var : sortedVars) {
             String placeholder = "$" + var.name;
             String value;
             if (var.stringValue != null) {
