@@ -1,45 +1,38 @@
 package com.testlangpp.model;
 
 public class Assertion {
-    public String type;    // "status", "header_equals", "header_contains", "body_contains"
-    public String key;     // for header assertions
-    public String value;   // expected value or substring
-    public Integer status; // for status assertion
+    public Integer statusCode;
+    public String headerKey;
+    public String headerValue;
+    public boolean isExactMatch;
+    public String bodyContains;
 
-    public Assertion() { }
-
-    // Status assertion
-    public Assertion(int status) {
-        this.type = "status";
-        this.status = status;
+    // expect status = NUMBER
+    public Assertion(Integer statusCode) {
+        this.statusCode = statusCode;
     }
 
-    // Header equals or contains
-    public Assertion(String key, String value, boolean exact) {
-        this.type = exact ? "header_equals" : "header_contains";
-        this.key = key;
-        this.value = value;
+    // expect header "K" = "V" or contains "V"
+    public Assertion(String headerKey, String headerValue, boolean isExactMatch) {
+        this.headerKey = headerKey;
+        this.headerValue = headerValue;
+        this.isExactMatch = isExactMatch;
     }
 
-    // Body contains
-    public Assertion(String value) {
-        this.type = "body_contains";
-        this.value = value;
+    // expect body contains "V"
+    public Assertion(String bodyContains) {
+        this.bodyContains = bodyContains;
     }
 
     @Override
     public String toString() {
-        switch (type) {
-            case "status":
-                return "expect status = " + status + ";";
-            case "header_equals":
-                return "expect header \"" + key + "\" = \"" + value + "\";";
-            case "header_contains":
-                return "expect header \"" + key + "\" contains \"" + value + "\";";
-            case "body_contains":
-                return "expect body contains \"" + value + "\";";
-            default:
-                return "unknown assertion";
+        if (statusCode != null) {
+            return "Assertion{status=" + statusCode + "}";
+        } else if (headerKey != null) {
+            String op = isExactMatch ? "=" : "contains";
+            return "Assertion{header " + headerKey + " " + op + " " + headerValue + "}";
+        } else {
+            return "Assertion{body contains " + bodyContains + "}";
         }
     }
 }

@@ -1,7 +1,7 @@
 /* ============================================================
-   TestLang++ File Structure Lexer
+   TestLang++ Lexer - Simplified & More Robust
    ------------------------------------------------------------
-   Recognizes config, let, and test blocks.
+   Recognizes all tokens for config, let, and test blocks
    ============================================================ */
 
 package com.testlangpp.lexer;
@@ -12,73 +12,111 @@ import com.testlangpp.parser.sym;
 %%
 
 %class Lexer
-%public 
+%public
 %unicode
 %cup
 %line
 %column
 
 %{
-  private Symbol symbol(int type, Object value) {
-    return new Symbol(type, yyline, yycolumn, value);
+  private Symbol symbol(int type) {
+    return new Symbol(type, yyline+1, yycolumn+1);
   }
 
-  private Symbol symbol(int type) {
-    return new Symbol(type, yyline, yycolumn);
+  private Symbol symbol(int type, Object value) {
+    return new Symbol(type, yyline+1, yycolumn+1, value);
+  }
+  
+  private void error(String message) {
+    System.err.println("Lexical error at line " + (yyline+1) + 
+                       ", column " + (yycolumn+1) + ": " + message);
   }
 %}
 
-/* Regular expressions */
-Letter = [A-Za-z_]
-Digit = [0-9]
-Ident = {Letter}({Letter}|{Digit})*
-Number = {Digit}+
-Whitespace = [ \t\r\n]+
-String = \"[^\"]*\"
+/* ============================================================
+   Regular Expression Definitions
+   ============================================================ */
 
-/* Escape-aware string handling */
-ESC = \\.
-STRCHAR = ([^\"\\\r\n] | {ESC})
-STRING = \"({STRCHAR})*\"
+/* Whitespace */
+LineTerminator = \r|\n|\r\n
+WhiteSpace     = {LineTerminator} | [ \t\f]
+
+/* Comments */
+Comment = "//" [^\r\n]*
+
+/* Identifiers */
+Letter = [A-Za-z_]
+Digit  = [0-9]
+Identifier = {Letter}({Letter}|{Digit})*
+
+/* Numbers */
+Number = 0 | [1-9][0-9]*
+
+/* Strings - handle escaped characters */
+StringCharacter = [^\r\n\"\\]
+StringEscape    = \\[\"\\nrtbf]
+String          = \"({StringCharacter}|{StringEscape})*\"
 
 %%
 
-/* Keywords */
-"config"      { return symbol(sym.CONFIG); }
-"base_url"    { return symbol(sym.BASE_URL); }
-"let"         { return symbol(sym.LET); }
-"test"        { return symbol(sym.TEST); }
-"GET"         { return symbol(sym.GET); }
-"POST"        { return symbol(sym.POST); }
-"PUT"         { return symbol(sym.PUT); }
-"DELETE"      { return symbol(sym.DELETE); }
-"expect"      { return symbol(sym.EXPECT); }
-"status"      { return symbol(sym.STATUS); }
-"header"      { return symbol(sym.HEADER); }
-"body"        { return symbol(sym.BODY); }
-"contains"    { return symbol(sym.CONTAINS); }
+/* ============================================================
+   LEXICAL RULES
+   ============================================================ */
 
-/* Operators */
-"="           { return symbol(sym.EQUALS); }
-";"           { return symbol(sym.SEMI); }
-"{"           { return symbol(sym.LBRACE); }
-"}"           { return symbol(sym.RBRACE); }
+/* Whitespace and Comments */
+{WhiteSpace}    { /* ignore */ }
+{Comment}       { /* ignore */ }
 
-/* Identifiers and literals */
-{Ident}       { return symbol(sym.IDENT, yytext()); }
-{Number}      { return symbol(sym.NUMBER, Integer.parseInt(yytext())); }
-{STRING} {
-    String raw = yytext(); // includes surrounding quotes
-    // remove surrounding quotes
-    String inner = raw.substring(1, raw.length() - 1);
-    // unescape common sequences: \" -> ", \\ -> \, \n -> newline, etc.
-    inner = inner.replace("\\\"", "\"").replace("\\\\", "\\")
-                 .replace("\\n", "\n").replace("\\r", "\r")
-                 .replace("\\t", "\t").replace("\\b", "").replace("\\f", "");
-    return symbol(sym.STRING, inner);
+/* Keywords - MUST come before identifiers */
+"config"        { return symbol(sym.CONFIG); }
+"base_url"      { return symbol(sym.BASE_URL); }
+"let"           { return symbol(sym.LET); }
+"test"          { return symbol(sym.TEST); }
+"expect"        { return symbol(sym.EXPECT); }
+"status"        { return symbol(sym.STATUS); }
+"header"        { return symbol(sym.HEADER); }
+"body"          { return symbol(sym.BODY); }
+"contains"      { return symbol(sym.CONTAINS); }
+
+/* HTTP Methods */
+"GET"           { return symbol(sym.GET); }
+"POST"          { return symbol(sym.POST); }
+"PUT"           { return symbol(sym.PUT); }
+"DELETE"        { return symbol(sym.DELETE); }
+
+/* Operators and Delimiters */
+"{"             { return symbol(sym.LBRACE); }
+"}"             { return symbol(sym.RBRACE); }
+"="             { return symbol(sym.EQUALS); }
+";"             { return symbol(sym.SEMI); }
+
+/* Literals */
+{Number} { 
+  return symbol(sym.NUMBER, Integer.valueOf(yytext())); 
 }
-/* Skip whitespace */
-{Whitespace}  { /* ignore */ }
 
-/* Any other character */
-.             { System.err.println("Illegal character: " + yytext()); }
+{String} {
+  // Remove quotes and handle escape sequences
+  String raw = yytext();
+  String content = raw.substring(1, raw.length() - 1);
+  
+  // Process escape sequences
+  content = content.replace("\\\"", "\"")
+                   .replace("\\\\", "\\")
+                   .replace("\\n", "\n")
+                   .replace("\\r", "\r")
+                   .replace("\\t", "\t")
+                   .replace("\\b", "\b")
+                   .replace("\\f", "\f");
+  
+  return symbol(sym.STRING, content);
+}
+
+{Identifier} { 
+  return symbol(sym.IDENT, yytext()); 
+}
+
+/* Error fallback */
+[^] {
+  error("Unexpected character: '" + yytext() + "'");
+}

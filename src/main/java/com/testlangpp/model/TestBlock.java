@@ -15,16 +15,6 @@ public class TestBlock {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("test ").append(name).append(" {\n");
-        if (request != null)
-            sb.append("  ").append(request).append("\n");
-        if (assertions != null) {
-            for (Assertion a : assertions) {
-                sb.append("  ").append(a).append("\n");
-            }
-        }
-        sb.append("}");
-        return sb.toString();
+        return "TestBlock{name='" + name + "', request=" + request + ", assertions=" + assertions + "}";
     }
 }
