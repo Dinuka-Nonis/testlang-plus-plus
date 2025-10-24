@@ -1,30 +1,28 @@
 package com.testlangpp.model;
 
-public class Variable {
+public class Variable {  // ← Must be PUBLIC
     public String name;
-    public Object value;  // Can be String or Integer
-    public String type;   // "string" or "integer"
+    public String stringValue;
+    public Integer intValue;
 
-    // String constructor
-    public Variable(String name, String value) {
+    public Variable(String name, String stringValue) {
         this.name = name;
-        this.value = value;
-        this.type = "string";
+        this.stringValue = stringValue;
+        this.intValue = null;
     }
 
-    // Integer constructor
-    public Variable(String name, Integer value) {
+    public Variable(String name, Integer intValue) {
         this.name = name;
-        this.value = value;
-        this.type = "integer";
+        this.stringValue = null;
+        this.intValue = intValue;
     }
 
     @Override
     public String toString() {
-        if (type.equals("string")) {
-            return "let " + name + " = \"" + value + "\";";
+        if (stringValue != null) {
+            return "Variable{" + name + "=\"" + stringValue + "\"}";
         } else {
-            return "let " + name + " = " + value + ";";
+            return "Variable{" + name + "=" + intValue + "}";
         }
     }
 }

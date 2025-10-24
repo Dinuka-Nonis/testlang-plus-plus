@@ -1,15 +1,17 @@
 config {
   base_url = "http://localhost:8080";
   header "Content-Type" = "application/json";
+  header "X-App" = "TestLangDemo";
 }
 
 let user = "admin";
+let password = "1234";
 let id = 42;
 
 test Login {
   POST "/api/login" {
-    body = "{ \"username\": \"$user\", \"password\": \"1234\" }";
-  };
+    body = "{ \"username\": \"$user\", \"password\": \"$password\" }";
+  }
   expect status = 200;
   expect header "Content-Type" contains "json";
   expect body contains "\"token\":";
@@ -19,4 +21,22 @@ test GetUser {
   GET "/api/users/$id";
   expect status = 200;
   expect body contains "\"id\": 42";
+}
+
+test UpdateUser {
+  PUT "/api/users/$id" {
+    header "Content-Type" = "application/json";
+    body = "{ \"role\": \"ADMIN\" }";
+  }
+  expect status = 200;
+  expect header "X-App" = "TestLangDemo";
+  expect header "Content-Type" contains "json";
+  expect body contains "\"updated\": true";
+  expect body contains "\"role\": \"ADMIN\"";
+}
+
+test DeleteUser {
+  DELETE "/api/users/99";
+  expect status = 200;
+  expect body contains "\"deleted\": true";
 }
