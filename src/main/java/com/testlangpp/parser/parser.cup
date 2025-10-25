@@ -102,6 +102,11 @@ request_stmt ::=
     {: RESULT = new RequestStatement("POST", path, h, b); :}
   | PUT STRING:path LBRACE header_list:h body_decl:b RBRACE SEMI
     {: RESULT = new RequestStatement("PUT", path, h, b); :}
+  | GET STRING:path EXPECT STATUS EQUALS NUMBER:code
+    {: 
+      System.err.println("Missing semicolon after request");
+      RESULT = new RequestStatement("GET", path, new ArrayList<RequestHeader>(), null);
+    :}
   ;
 //Headers
 
@@ -124,6 +129,11 @@ body_decl ::=
     {: RESULT = null; :}
   | BODY EQUALS STRING:content SEMI
     {: RESULT = new RequestBody(content); :}
+  | BODY EQUALS NUMBER:content SEMI
+    {: 
+      System.err.println("Body must be a string");
+      RESULT = null;
+    :}
   ;
 
 // Assertions
@@ -143,6 +153,11 @@ assertion_list ::=
 assertion_stmt ::=
     EXPECT STATUS EQUALS NUMBER:code SEMI
     {: RESULT = new Assertion(code); :}
+  | EXPECT STATUS EQUALS STRING:code SEMI
+    {: 
+      System.err.println("Status must be integer");
+      RESULT = new Assertion(0); // dummy value
+    :}
   | EXPECT HEADER STRING:key EQUALS STRING:value SEMI
     {: RESULT = new Assertion(key, value, true); :}
   | EXPECT HEADER STRING:key CONTAINS STRING:value SEMI

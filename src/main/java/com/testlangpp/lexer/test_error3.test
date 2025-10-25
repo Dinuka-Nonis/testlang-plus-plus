@@ -1,0 +1,8 @@
+config {
+  base_url = "http://localhost:8080";
+}
+
+test Test1 {
+  GET "/api/test";
+  expect status = "200";
+}

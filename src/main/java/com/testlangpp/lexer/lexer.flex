@@ -106,6 +106,11 @@ String          = \"({StringCharacter}|{StringEscape})*\"
   return symbol(sym.IDENT, yytext()); 
 }
 
+/* Invalid identifiers starting with digits */
+[0-9][A-Za-z0-9_]* {
+  error("Identifier cannot start with a digit: '" + yytext() + "'");
+}
+
 /* Error fallback */
 [^] {
   error("Unexpected character: '" + yytext() + "'");
