@@ -1,0 +1,10 @@
+config {
+  base_url = "http://localhost:8080";
+}
+
+let 2a = "x";
+
+test Test1 {
+  GET "/api/test";
+  expect status = 200;
+}
