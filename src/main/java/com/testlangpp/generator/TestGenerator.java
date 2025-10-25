@@ -18,9 +18,19 @@ import com.testlangpp.model.Variable;
 public class TestGenerator {
 
     public static void generate(Program program) throws IOException {
-        File outFile = new File("GeneratedTests.java");
+        // Create the target directory structure if it doesn't exist
+        File targetDir = new File("src/test/java/com/testlangpp/generator");
+        if (!targetDir.exists()) {
+            targetDir.mkdirs();
+        }
+        
+        File outFile = new File(targetDir, "GeneratedTests.java");
         try (PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(outFile)))) {
 
+            // --- Package declaration ---
+            pw.println("package com.testlangpp.generator;");
+            pw.println();
+            
             // --- Header imports ---
             pw.println("import org.junit.jupiter.api.*;");
             pw.println("import static org.junit.jupiter.api.Assertions.*;");

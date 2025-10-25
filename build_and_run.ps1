@@ -9,7 +9,7 @@ Write-Host "Step 1: Cleaning up existing generated files..." -ForegroundColor Ye
 if (Test-Path "src\main\java\com\testlangpp\lexer\Lexer.java") { Remove-Item "src\main\java\com\testlangpp\lexer\Lexer.java" }
 if (Test-Path "src\main\java\com\testlangpp\parser\Parser.java") { Remove-Item "src\main\java\com\testlangpp\parser\Parser.java" }
 if (Test-Path "src\main\java\com\testlangpp\parser\sym.java") { Remove-Item "src\main\java\com\testlangpp\parser\sym.java" }
-if (Test-Path "GeneratedTests.java") { Remove-Item "GeneratedTests.java" }
+if (Test-Path "com.testlangpp.generator.GeneratedTests.java") { Remove-Item "com.testlangpp.generator.GeneratedTests.java" }
 if (Test-Path "com") { Remove-Item -Recurse -Force "com" }
 if (Test-Path "target") { Remove-Item -Recurse -Force "target" }
 
@@ -51,6 +51,6 @@ if ($LASTEXITCODE -ne 0) {
 
 Write-Host ""
 Write-Host "========================================" -ForegroundColor Green
-Write-Host "SUCCESS! GeneratedTests.java created!" -ForegroundColor Green
+Write-Host "SUCCESS! com.testlangpp.generator.GeneratedTests.java created!" -ForegroundColor Green
 Write-Host "========================================" -ForegroundColor Green
 Read-Host "Press Enter to exit"

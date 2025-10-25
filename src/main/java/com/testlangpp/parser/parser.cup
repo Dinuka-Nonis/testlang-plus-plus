@@ -1,9 +1,3 @@
-/* ============================================================
-    Parser for TestLang++ - Fixed Shift/Reduce Conflicts
-    ------------------------------------------------------------
-    Resolved grammar conflicts for reliable parsing
-    ============================================================ */
-
 package com.testlangpp.parser;
 
 import java.util.*;
@@ -13,9 +7,8 @@ parser code {:
   // Main execution logic moved to Main.java
 :};
 
-/* --------------------------
-   Terminals (Tokens)
-   -------------------------- */
+//   Terminals (Tokens)
+
 terminal CONFIG, BASE_URL, LET, TEST, EXPECT, STATUS;
 terminal GET, POST, PUT, DELETE;
 terminal HEADER, BODY, CONTAINS;
@@ -23,9 +16,9 @@ terminal LBRACE, RBRACE, EQUALS, SEMI;
 terminal String IDENT, STRING;
 terminal Integer NUMBER;
 
-/* --------------------------
-   Nonterminals (Grammar Rules)
-   -------------------------- */
+
+//   Nonterminals (Grammar Rules)
+  
 non terminal Program program;
 non terminal Config config_block;
 non terminal List<Variable> variable_list;
@@ -39,14 +32,11 @@ non terminal RequestBody body_decl;
 non terminal List<Assertion> assertion_list;
 non terminal Assertion assertion_stmt;
 
-/* --------------------------
-   Start Symbol
-   -------------------------- */
+// start symbol
+
 start with program;
 
-/* ============================================================
-   GRAMMAR RULES - Fixed to avoid conflicts
-   ============================================================ */
+//Grammer Rules
 
 /* Main program structure */
 program ::= 
@@ -56,17 +46,15 @@ program ::=
     {: RESULT = new Program(null, v, t); :}
   ;
 
-/* ============================================================
-   CONFIG BLOCK
-   ============================================================ */
+// config block
+
 config_block ::=
     CONFIG LBRACE BASE_URL EQUALS STRING:url SEMI header_list:h RBRACE
     {: RESULT = new Config(url, h); :}
   ;
 
-/* ============================================================
-   VARIABLES - Changed to avoid conflict
-   ============================================================ */
+// Variables
+
 variable_list ::=
     /* empty */
     {: RESULT = new ArrayList<Variable>(); :}
@@ -81,9 +69,8 @@ variable_decl ::=
     {: RESULT = new Variable(name, value); :}
   ;
 
-/* ============================================================
-   TEST BLOCKS - Changed to require at least one test
-   ============================================================ */
+// Test Blocks
+
 test_list ::=
     test_block:t
     {: 
@@ -100,9 +87,8 @@ test_block ::=
     {: RESULT = new TestBlock(name, req, asserts); :}
   ;
 
-/* ============================================================
-   HTTP REQUESTS
-   ============================================================ */
+// HTTP Requests
+
 request_stmt ::=
     GET STRING:path SEMI
     {: RESULT = new RequestStatement("GET", path, new ArrayList<RequestHeader>(), null); :}
@@ -117,10 +103,8 @@ request_stmt ::=
   | PUT STRING:path LBRACE header_list:h body_decl:b RBRACE SEMI
     {: RESULT = new RequestStatement("PUT", path, h, b); :}
   ;
+//Headers
 
-/* ============================================================
-   HEADERS
-   ============================================================ */
 header_list ::=
     /* empty */
     {: RESULT = new ArrayList<RequestHeader>(); :}
@@ -133,9 +117,8 @@ header_decl ::=
     {: RESULT = new RequestHeader(key, value); :}
   ;
 
-/* ============================================================
-   BODY
-   ============================================================ */
+// Body
+
 body_decl ::=
     /* empty */
     {: RESULT = null; :}
@@ -143,9 +126,8 @@ body_decl ::=
     {: RESULT = new RequestBody(content); :}
   ;
 
-/* ============================================================
-   ASSERTIONS - Minimum 2 required
-   ============================================================ */
+// Assertions
+
 assertion_list ::=
     assertion_stmt:a1 assertion_stmt:a2
     {: 

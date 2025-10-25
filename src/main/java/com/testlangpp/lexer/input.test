@@ -20,7 +20,7 @@ test Login {
 test GetUser {
   GET "/api/users/$id";
   expect status = 200;
-  expect body contains "\"id\": 42";
+  expect body contains "\"id\":42";
 }
 
 test UpdateUser {
@@ -31,12 +31,12 @@ test UpdateUser {
   expect status = 200;
   expect header "X-App" = "TestLangDemo";
   expect header "Content-Type" contains "json";
-  expect body contains "\"updated\": true";
-  expect body contains "\"role\": \"ADMIN\"";
+  expect body contains "\"updated\":true";
+  expect body contains "\"role\":\"ADMIN\"";
 }
 
 test DeleteUser {
   DELETE "/api/users/99";
   expect status = 200;
-  expect body contains "\"deleted\": true";
+  expect body contains "\"deleted\":true";
 }
