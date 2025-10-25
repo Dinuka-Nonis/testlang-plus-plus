@@ -11,6 +11,7 @@ if exist "src\main\java\com\testlangpp\lexer\Lexer.java~" del "src\main\java\com
 if exist "src\main\java\com\testlangpp\parser\Parser.java" del "src\main\java\com\testlangpp\parser\Parser.java"
 if exist "src\main\java\com\testlangpp\parser\sym.java" del "src\main\java\com\testlangpp\parser\sym.java"
 if exist "src\main\java\com\testlangpp\parser\Parser$CUP$Parser$actions.class" del "src\main\java\com\testlangpp\parser\Parser$CUP$Parser$actions.class"
+if exist "src\test\java\com\testlangpp\generator\GeneratedTests.java" del "src\test\java\com\testlangpp\generator\GeneratedTests.java"
 if exist "GeneratedTests.java" del "GeneratedTests.java"
 if exist "com" rmdir /s /q "com"
 if exist "target" rmdir /s /q "target"
@@ -58,6 +59,6 @@ echo TestLang++ execution completed successfully.
 
 echo.
 echo ========================================
-echo SUCCESS! GeneratedTests.java created!
+echo SUCCESS! src\test\java\com\testlangpp\generator\GeneratedTests.java created!
 echo ========================================
 pause

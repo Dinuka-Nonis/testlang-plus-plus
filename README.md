@@ -16,7 +16,7 @@ The goal of TestLang++ is to:
 
 Example workflow:
 
-DSL File (.test) → Parser → AST → GeneratedTests.java → Run with JUnit
+DSL File (.test) → Parser → AST → com.testlangpp.generator.GeneratedTests.java → Run with JUnit
 
 ---
 
@@ -92,7 +92,7 @@ cd testlang-plus-plus
          │----------------------------------------------│
          │ Tool: Java                                   │
          │ Reads AST and writes Java test code          │
-         │ Output: GeneratedTests.java                  │
+         │ Output: com.testlangpp.generator.GeneratedTests.java                  │
          └──────────────────────────────────────────────┘
                                       │
                                       ▼
@@ -100,7 +100,7 @@ cd testlang-plus-plus
          │              🔹 5️⃣ COMPILATION              │
          │----------------------------------------------│
          │ Tool: Maven / javac                          │
-         │ Compiles GeneratedTests.java                 │
+         │ Compiles com.testlangpp.generator.GeneratedTests.java                 │
          │ Output: Bytecode (.class files)              │
          └──────────────────────────────────────────────┘
                                       │
@@ -113,6 +113,42 @@ cd testlang-plus-plus
          │ Validates responses, asserts status codes    │
          │ Output: Pass/Fail results                    │
          └──────────────────────────────────────────────┘
+
+---
+
+##  Quick Start
+
+### Option 1: All-in-One (Recommended)
+Run backend and tests together:
+```bash
+.\run_backend_and_tests.bat
+```
+
+### Option 2: Manual Steps
+1. **Build the project:**
+   ```bash
+   .\build_and_run.bat
+   ```
+
+2. **Start backend manually:**
+   ```bash
+   cd testlang-demo-backend
+   mvn spring-boot:run
+   ```
+
+3. **Run tests:**
+   ```bash
+   .\run_tests_only.bat
+   ```
+
+### Option 3: Stop Backend
+```bash
+.\stop_backend.bat
+```
+
+---
+
+##  Manual Build Process
 
 # Clean generated files
 Remove-Item src\main\java\com\testlangpp\lexer\Lexer.java -ErrorAction SilentlyContinue

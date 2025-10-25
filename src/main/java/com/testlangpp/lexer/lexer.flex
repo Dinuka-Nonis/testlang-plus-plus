@@ -1,9 +1,3 @@
-/* ============================================================
-   TestLang++ Lexer - Simplified & More Robust
-   ------------------------------------------------------------
-   Recognizes all tokens for config, let, and test blocks
-   ============================================================ */
-
 package com.testlangpp.lexer;
 
 import java_cup.runtime.Symbol;
@@ -33,9 +27,7 @@ import com.testlangpp.parser.sym;
   }
 %}
 
-/* ============================================================
-   Regular Expression Definitions
-   ============================================================ */
+//Regular Expression Definitions
 
 /* Whitespace */
 LineTerminator = \r|\n|\r\n
@@ -59,9 +51,7 @@ String          = \"({StringCharacter}|{StringEscape})*\"
 
 %%
 
-/* ============================================================
-   LEXICAL RULES
-   ============================================================ */
+//LEXICAL RULES
 
 /* Whitespace and Comments */
 {WhiteSpace}    { /* ignore */ }
@@ -96,7 +86,7 @@ String          = \"({StringCharacter}|{StringEscape})*\"
 }
 
 {String} {
-  // Remove quotes and handle escape sequences
+
   String raw = yytext();
   String content = raw.substring(1, raw.length() - 1);
   

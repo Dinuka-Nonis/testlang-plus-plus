@@ -34,7 +34,7 @@ java -cp "target\classes;D:\SLIIT\semester_4\PP\ASSIGNMENT\java-cup-bin-11b-2016
 3. **Generate Parser** from CUP specification
 4. **Compile** the entire project with Maven
 5. **Run** the TestLang++ compiler from Main.java
-6. **Generate** GeneratedTests.java
+6. **Generate** com.testlangpp.generator.GeneratedTests.java
 
 ## Available Test Files
 
@@ -50,8 +50,8 @@ java -cp "target\classes;D:\SLIIT\semester_4\PP\ASSIGNMENT\java-cup-bin-11b-2016
 ## Output
 
 After successful execution, you'll get:
-- ✅ **GeneratedTests.java** - Complete JUnit 5 test suite
-- 📊 **Console output** showing parsing results and variable substitution
+-  **com.testlangpp.generator.GeneratedTests.java** - Complete JUnit 5 test suite
+-  **Console output** showing parsing results and variable substitution
 
 ## Prerequisites
 
@@ -67,7 +67,7 @@ After successful execution, you'll get:
 testlang-plus-plus/
 ├── build_and_run.bat          # Windows batch script
 ├── build_and_run.ps1         # PowerShell script
-├── GeneratedTests.java        # Generated JUnit tests
+├── com.testlangpp.generator.GeneratedTests.java        # Generated JUnit tests
 └── src/main/java/com/testlangpp/
     ├── Main.java              # Main entry point
     ├── lexer/

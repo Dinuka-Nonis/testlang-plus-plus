@@ -1,10 +1,11 @@
 package com.testlangpp;
 
 import java.io.FileReader;
-import com.testlangpp.lexer.Lexer;
-import com.testlangpp.parser.Parser;
-import com.testlangpp.model.Program;
+
 import com.testlangpp.generator.TestGenerator;
+import com.testlangpp.lexer.Lexer;
+import com.testlangpp.model.Program;
+import com.testlangpp.parser.Parser;
 
 public class Main {
     public static void main(String[] args) {
@@ -23,18 +24,18 @@ public class Main {
 
             // Parse the input file
             Program program = (Program) parser.parse().value;
-            System.out.println("\n✅ Parsing successful!");
+            System.out.println("\n Parsing successful!");
             System.out.println("Program parsed: " + program);
             
             // Generate JUnit tests
-            System.out.println("\n🔧 Generating JUnit tests...");
+            System.out.println("\n Generating JUnit tests...");
             TestGenerator.generate(program);
             
-            System.out.println("\n🎉 TestLang++ compilation completed successfully!");
+            System.out.println("\n TestLang++ compilation completed successfully!");
             System.out.println("Generated: GeneratedTests.java");
             
         } catch (Exception e) {
-            System.err.println("\n❌ Compilation failed: " + e.getMessage());
+            System.err.println("\n Compilation failed: " + e.getMessage());
             e.printStackTrace();
             System.exit(1);
         }
