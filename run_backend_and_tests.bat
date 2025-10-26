@@ -1,86 +1,82 @@
 @echo off
+setlocal enabledelayedexpansion
+
 echo ========================================
 echo TestLang++ Backend and Tests Runner
 echo ========================================
 echo.
 
+:: STEP 1: Check if backend is already running
 echo Step 1: Checking if backend is already running...
 netstat -an | findstr ":8080" >nul
 if %errorlevel% == 0 (
     echo  Backend is already running on port 8080
-    goto :run_tests
 ) else (
-    echo   Backend not detected, starting it...
-)
+    echo  Backend not detected, starting it...
+    echo.
+    echo Step 2: Starting Spring Boot Backend...
+    start /B cmd /c "cd testlang-demo-backend && mvn spring-boot:run > backend.log 2>&1"
 
-echo.
-echo Step 2: Starting Spring Boot Backend...
-echo Starting backend server in background...
-start /B cmd /c "cd testlang-demo-backend && mvn spring-boot:run > backend.log 2>&1"
+    echo Waiting for backend to start...
+    ping 127.0.0.1 -n 8 >nul
 
-echo Waiting for backend to start...
-ping 127.0.0.1 -n 8 >nul
-
-echo Checking if backend started successfully...
-netstat -an | findstr ":8080" >nul
-if %errorlevel% == 0 (
+    echo Checking if backend started successfully...
+    netstat -an | findstr ":8080" >nul
+    if not %errorlevel% == 0 (
+        echo  Backend failed to start. Check backend.log for details.
+        pause
+        exit /b 1
+    )
     echo  Backend started successfully on port 8080
-) else (
-    echo  Backend failed to start. Check backend.log for details.
+)
+echo.
+
+:: STEP 3: Compile and Run Tests
+if "%~1"=="" (
+    echo Usage: %~nx0 ^<GeneratedTests.java^>
+    echo Example: %~nx0 output\GeneratedTests.java
     pause
     exit /b 1
 )
 
-:run_tests
-echo.
-echo Step 3: Generating and Running Tests...
-echo ========================================
+set "GENERATED_FILE=%~1"
 
-echo  Generating tests from TestLang++ DSL...
-call java -cp "target\classes;D:\SLIIT\semester_4\PP\ASSIGNMENT\java-cup-bin-11b-20160615\java-cup-11b-runtime.jar" com.testlangpp.Main
-if errorlevel 1 (
-    echo  Test generation failed!
+if not exist "%GENERATED_FILE%" (
+    echo Error: Generated test file '%GENERATED_FILE%' not found
     pause
     exit /b 1
 )
-echo  Tests generated successfully
 
 echo.
-echo  Running Generated Tests...
-echo ========================================
-call mvn test -Dtest=GeneratedTests -q
-if %errorlevel% == 0 (
-    echo.
-    echo  ALL TESTS PASSED! 
-    echo ========================================
-    echo Test Results Summary:
-    echo - Login Test:  PASSED
-    echo - Get User Test:  PASSED  
-    echo - Update User Test:  PASSED
-    echo - Delete User Test:  PASSED
-    echo - Login Different User Test:  PASSED
-    echo.
-    echo  All 5 API endpoints tested successfully!
-    echo Backend is working correctly with TestLang++ DSL.
-) else (
-    echo.
-    echo  SOME TESTS FAILED!
-    echo ========================================
-    echo Check the detailed output above for specific failures.
-    echo Common issues:
-    echo - Backend not running on port 8080
-    echo - Network connectivity issues
-    echo - JSON format mismatches
+echo Step 3: Preparing JUnit environment...
+
+set "JUNIT_DIR=lib"
+if not exist "%JUNIT_DIR%" mkdir "%JUNIT_DIR%"
+
+set "JUNIT_JAR=%JUNIT_DIR%\junit-platform-console-standalone-1.10.0.jar"
+
+if not exist "%JUNIT_JAR%" (
+    echo Downloading JUnit 5...
+    powershell -Command "Invoke-WebRequest -Uri 'https://repo1.maven.org/maven2/org/junit/platform/junit-platform-console-standalone/1.10.0/junit-platform-console-standalone-1.10.0.jar' -OutFile '%JUNIT_JAR%'"
+)
+
+set "TEST_BUILD=build\tests"
+if not exist "%TEST_BUILD%" mkdir "%TEST_BUILD%"
+
+echo.
+echo === Compiling Generated Tests ===
+javac -d "%TEST_BUILD%" -cp "%JUNIT_JAR%" "%GENERATED_FILE%"
+if %errorlevel% neq 0 (
+    echo ❌ Compilation failed.
+    pause
+    exit /b 1
 )
 
 echo.
-echo ========================================
-echo Test Execution Complete
-echo ========================================
+echo === Running JUnit Tests ===
+java -jar "%JUNIT_JAR%" --class-path "%TEST_BUILD%" --scan-class-path
+
 echo.
-echo 💡 Tips:
-echo - Backend logs are saved in: testlang-demo-backend\backend.log
-echo - Test reports are in: target\surefire-reports\
-echo - To stop backend: Close the backend window or Ctrl+C
-echo.
+echo ✓ Tests completed successfully!
 pause
+exit /b 0
